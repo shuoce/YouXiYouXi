@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- 适配手机屏幕 -->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>云水剑歌 · 武侠轻功 Demo</title>
+
+  <!-- 网站图标，暂时使用内嵌 SVG，不需要额外资源 -->
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚔️%3C/text%3E%3C/svg%3E"
+  >
+
+  <!-- 游戏样式 -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!-- Three.js 游戏画布会自动插入这里 -->
+  <main id="game-container" aria-label="云水剑歌游戏区域"></main>
+
+  <!-- 加载界面 -->
+  <section id="loading-screen" class="screen loading-screen">
+    <div class="loading-decoration">☯</div>
+    <h1>云水剑歌</h1>
+    <p class="subtitle">武侠轻功动作试炼</p>
+<!---->
+    <div class="loading-bar">
+      <div id="loading-progress"></div>
+    </div>
+<!---->
+    <p id="loading-text">正在进入江湖……</p>
+  
+</section>
+
+
+
+  <!-- 开始菜单 -->
+  <section id="start-screen" class="screen menu-screen hidden">
+    <div class="menu-panel">
+      <div class="title-mark">剑影 · 山河 · 江湖</div>
+<!---->
+      <h1>云水剑歌</h1>
+      <p class="subtitle">一念起，踏云行</p>
+<!---->
+      <div class="menu-divider">
+        <span>◆</span>
+      </div>
+<!---->
+      <p class="menu-description">
+        在青山峡谷中施展轻功、磨炼剑术，击败来犯的山匪。
+      </p>
+<!---->
+      <button id="start-button" class="main-button">
+        <span>开始试炼</span>
+      </button>
+<!---->
+      <button id="controls-button" class="text-button">
+        操作说明
+      </button>
+<!---->
+      <div class="version-text">Prototype v0.1</div>
+    </div>
+  
+</section>
+
+
+
+  <!-- 操作说明 -->
+  <section id="controls-screen" class="screen modal-screen hidden">
+    <div class="modal-panel">
+      <button id="close-controls-button" class="close-button" aria-label="关闭">
+        ×
+      </button>
+<!---->
+      <h2>江湖身法</h2>
+<!---->
+      <div class="controls-list">
+        <div class="control-row">
+          <span class="control-key">W A S D</span>
+          <span>移动</span>
+        
+</div>
+<!---->
+
+<!---->
+        <div class="control-row">
+          <span class="control-key">SHIFT</span>
+          <span>疾跑</span>
+        </div>
+<!---->
+        <div class="control-row">
+          <span class="control-key">SPACE</span>
+          <span>跳跃</span>
+        </div>
+<!---->
+        <div class="control-row">
+          <span class="control-key">E</span>
+          <span>轻功冲刺</span>
+        </div>
+<!---->
+        <div class="control-row">
+          <span class="control-key">J / 鼠标左键</span>
+          <span>拔剑攻击</span>
+        </div>
+<!---->
+        <div class="control-row">
+          <span class="control-key">K / 鼠标右键</span>
+          <span>闪避</span>
+        </div>
+<!---->
+        <div class="control-row">
+          <span class="control-key">TAB</span>
+          <span>锁定敌人</span>
+        </div>
+<!---->
+        <div class="control-row">
+          <span class="control-key">ESC</span>
+          <span>暂停游戏</span>
+        </div>
+      </div>
+<!---->
+      <button id="back-from-controls-button" class="main-button small-button">
+        返回
+      </button>
+    </div>
+  
+</section>
+
+
+
+  <!-- 游戏 UI -->
+  <section id="game-ui" class="game-ui hidden" aria-label="游戏状态">
+    <!-- 左上角角色状态 -->
+    <div class="player-status hud-panel">
+      <div class="player-info">
+        <div id="player-avatar" class="player-avatar">侠</div>
+<!---->
+        <div class="player-name-box">
+          <div class="player-name">无名剑客</div>
+          <div id="player-level" class="player-level">Lv.1 初入江湖</div>
+        </div>
+      </div>
+<!---->
+      <div class="status-bar-group">
+        <div class="status-label">
+          <span>生命</span>
+          <span id="health-value">100 / 100</span>
+        </div>
+<!---->
+        <div class="status-bar health-bar">
+          <div id="health-fill" class="status-fill"></div>
+        </div>
+      </div>
+<!---->
+      <div class="status-bar-group">
+        <div class="status-label">
+          <span>内力</span>
+          <span id="energy-value">100 / 100</span>
+        </div>
+<!---->
+        <div class="status-bar energy-bar">
+          <div id="energy-fill" class="status-fill"></div>
+        </div>
+      </div>
+    </div>
+<!---->
+    <!-- 右上角任务区域 -->
+    <div class="quest-panel hud-panel">
+      <div class="quest-title">
+        <span class="quest-icon">卷</span>
+        当前试炼
+      </div>
+<!---->
+      <div id="quest-name" class="quest-name">峡谷试剑</div>
+      <div id="quest-description" class="quest-description">
+        击败峡谷中的敌人
+      </div>
+<!---->
+      <div class="quest-progress">
+        <span id="quest-progress-text">0 / 3</span>
+      </div>
+    </div>
+<!---->
+    <!-- 中央锁定目标 -->
+    <div id="target-lock" class="target-lock hidden">
+      <div class="target-bracket target-bracket-top-left"></div>
+      <div class="target-bracket target-bracket-top-right"></div>
+      <div class="target-bracket target-bracket-bottom-left"></div>
+      <div class="target-bracket target-bracket-bottom-right"></div>
+<!---->
+      <div id="target-name">山匪</div>
+      <div class="target-health-bar">
+        <div id="target-health-fill"></div>
+      </div>
+    </div>
+<!---->
+    <!-- 中央提示 -->
+    <div id="game-message" class="game-message"></div>
+<!---->
+    <!-- 左下角轻功体力 -->
+    <div class="movement-status hud-panel">
+      <div class="movement-label">
+        <span>轻功</span>
+        <span id="stamina-value">100 / 100</span>
+      </div>
+<!---->
+      <div class="status-bar stamina-bar">
+        <div id="stamina-fill" class="status-fill"></div>
+      </div>
+<!---->
+      <div id="movement-state" class="movement-state">闲庭信步</div>
+    </div>
+<!---->
+    <!-- 右下角技能快捷栏 -->
+    <div class="skill-panel">
+      <button id="attack-skill" class="skill-button attack-skill" title="攻击">
+        <span class="skill-symbol">剑</span>
+        <span class="skill-key">J</span>
+      </button>
+<!---->
+      <button id="dodge-skill" class="skill-button dodge-skill" title="闪避">
+        <span class="skill-symbol">影</span>
+        <span class="skill-key">K</span>
+      </button>
+<!---->
+      <button id="dash-skill" class="skill-button dash-skill" title="轻功">
+        <span class="skill-symbol">风</span>
+        <span class="skill-key">E</span>
+      </button>
+    
+</div>
+<!---->
+
+<!---->
+    <!-- 右侧暂停按钮 -->
+    <button id="pause-button" class="pause-button" aria-label="暂停游戏">
+      Ⅱ
+    </button>
+<!---->
+    <!-- 手机触屏控制 -->
+    <div id="mobile-controls" class="mobile-controls">
+      <div class="virtual-joystick">
+        <div id="joystick-base" class="joystick-base">
+          <div id="joystick-stick" class="joystick-stick"></div>
+        </div>
+      </div>
+<!---->
+      <div class="mobile-action-buttons">
+        <button id="mobile-jump-button" class="mobile-action jump-action">
+          跃
+        </button>
+<!---->
+        <button id="mobile-dash-button" class="mobile-action dash-action">
+          风
+        </button>
+<!---->
+        <button id="mobile-attack-button" class="mobile-action attack-action">
+          剑
+        </button>
+      
+</div>
+<!---->
+
+    </div>
+  
+</section>
+
+
+
+  <!-- 暂停菜单 -->
+  <section id="pause-screen" class="screen modal-screen hidden">
+    <div class="modal-panel">
+      <h2>暂歇</h2>
+      <p class="modal-subtitle">江湖路远，稍作歇息</p>
+<!---->
+      <button id="resume-button" class="main-button">
+        继续游戏
+      </button>
+<!---->
+      <button id="restart-button" class="secondary-button">
+        重新开始
+      </button>
+<!---->
+      <button id="quit-button" class="text-button">
+        返回主菜单
+      </button>
+    
+</div>
+<!---->
+
+  
+</section>
+
+
+
+  <!-- 游戏结束界面 -->
+  <section id="game-over-screen" class="screen modal-screen hidden">
+    <div class="modal-panel">
+      <div id="game-over-symbol" class="game-over-symbol">☵</div>
+<!---->
+      <h2 id="game-over-title">试炼结束</h2>
+      <p id="game-over-description" class="modal-subtitle">
+        胜负乃兵家常事，再战便是
+      </p>
+<!---->
+      <div class="result-stats">
+        <div class="result-item">
+          <span>击败敌人</span>
+          <strong id="final-defeated">0</strong>
+        </div>
+<!---->
+        <div class="result-item">
+          <span>获得分数</span>
+          <strong id="final-score">0</strong>
+        </div>
+<!---->
+        <div class="result-item">
+          <span>最高分</span>
+          <strong id="best-score">0</strong>
+        </div>
+      </div>
+<!---->
+      <button id="game-over-restart-button" class="main-button">
+        再战江湖
+      </button>
+<!---->
+      <button id="game-over-menu-button" class="text-button">
+        返回主菜单
+      </button>
+    </div>
+  
+</section>
+
+
+
+  <!-- 屏幕提示和调试信息 -->
+  <div id="toast-container" class="toast-container"></div>
+  <div id="debug-info" class="debug-info hidden"></div>
+
+  <!--
+    Three.js 使用 ES Module 方式加载。
+    如果你希望完全离线运行，可以将 three.module.js 下载到 libs/three/ 目录，
+    再把下面的 CDN 地址替换成本地路径。
+  -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <!-- 游戏主程序 -->
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
